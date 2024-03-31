@@ -4,7 +4,7 @@ export const postRequest = async (url, body) => {
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json", // Fixed typo here
+      "Content-Type": "application/json", 
     },
     body,
   });
