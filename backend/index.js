@@ -19,6 +19,8 @@ app.use("/api/chats", chatRoute);
 app.use("/api", quizRoutes);
 app.use("/api/upload", uploadRoute); // Mount the upload route
 app.use("/api/getquiz",retrievRoute);
+app.use('/uploads', express.static('uploads'));
+
 
 app.get("/", (req, res) => {
   res.send("Welcome to our chat");

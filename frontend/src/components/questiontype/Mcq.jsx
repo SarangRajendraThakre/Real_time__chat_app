@@ -45,23 +45,37 @@ const Mcq = () => {
   };
   
   // Function to handle image change
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setImage(file); // Store the selected image file
-  };
-  const handleSubmit = async () => {
+  const handleImageChange = async (e) => {
     try {
-      let imagePath = ""; // Initialize imagePath to empty string
+      const file = e.target.files[0];
+      setImage(file); // Store the selected image file
   
-      // Check if an image is selected
-      if (image) {
-        // If image is selected, upload it
+      // Check if there's no imagePath already set
+      if (!imagePath) {
+        // If no imagePath exists, upload the image
+        // Create a FormData object
         const formData = new FormData();
-        formData.append("image", image);
+        formData.append("image", file);
   
         // Upload the image file
         const uploadResponse = await axios.post("http://localhost:5000/api/upload", formData);
-        imagePath = uploadResponse.data.imagePath; // Get the uploaded image path
+  
+        // Set the image path to the uploaded image's path
+        setImagePath(uploadResponse.data.imagePath);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      // Handle error
+    }
+  };
+  const handleSubmit = async () => {
+    try {
+      let uploadedImagePath = ""; // Initialize uploadedImagePath to an empty string
+  
+      // Check if an image is already uploaded and imagePath is not empty
+      if (imagePath) {
+        // If imagePath is not empty, use the existing image path
+        uploadedImagePath = imagePath;
       }
   
       // Get the createdQuizId from local storage
@@ -73,26 +87,20 @@ const Mcq = () => {
         return; // Exit the function if createdQuizId is not found
       }
   
-      // Log the data before sending it to the backend
-      console.log("Submitting data to backend:", {
-        questiontype,
-        question,
-        answers,
-        correctAnswerIndex,
-        imagePath,
+      // Send the question data along with the image path and other required fields to the backend
+      const questionData = {
+        question: question,
+        answers: answers,
+        correctAnswerIndex: correctAnswerIndex,
+        questiontype: questiontype, // Include questiontype field
+        imagePath: uploadedImagePath,
         quizId: createdQuizId // Include createdQuizId as quizId in the request data
-      });
+      };
   
-      // Send the question data along with the image path and quizId to the backend
-      const addQuestionResponse = await axios.post("http://localhost:5000/api/add-question", {
-        question,
-        answers,
-        correctAnswerIndex,
-        questiontype,
-        imagePath,
-        quizId: createdQuizId // Include createdQuizId as quizId in the request data
-      });
-  
+      // Make the API call to add the question
+      const addQuestionResponse = await axios.post("http://localhost:5000/api/add-question", questionData);
+      
+      // Log the response from the backend
       console.log("Question added successfully:", addQuestionResponse.data);
   
       // Clear form fields after successful submission
@@ -105,6 +113,7 @@ const Mcq = () => {
       // Handle error
     }
   };
+  
   
   
   
@@ -140,45 +149,55 @@ const Mcq = () => {
           <div className="mainmiddleareainner">
             <div className="mainmiddleareainnerinner">
               <div className="mainmiddleareainnerinner">
-                <div className="mainmiddleareainnerinnerinner">
-                  <div className="mainmiddleareainnerinnerinnerinner">
-                    <div className="uploadinnercontent">
-                    <div className="uploadimg">
-        <div className="uploadimgurl">
-          {imagePath && <img src={imagePath} alt="Uploaded" />}
-        </div>
-        {/* Trigger file input field click on icon click */}
-        <label htmlFor="fileInput" className="uploadbtn" >
-          <div className="uploadbtninner">
-            <span className="spanicon">
-              <BsPlusLg fontSize="25px" />
-            </span>
+              <div className="mainmiddleareainnerinnerinner">
+  <div className="mainmiddleareainnerinnerinnerinner">
+    <div className="uploadinnercontent">
+      { !imagePath && (
+        <>
+          <div className="uploadimg">
+            <div className="uploadimgurl">
+              {imagePath && <img src={`http://localhost:5000${imagePath}`} alt="Uploaded" />}
+            </div>
+            {/* Trigger file input field click on icon click */}
+            <label htmlFor="fileInput" className="uploadbtn" >
+              <div className="uploadbtninner">
+                <span className="spanicon">
+                  <BsPlusLg fontSize="25px" />
+                </span>
+              </div>
+            </label>
+            {/* Hidden file input field */}
+            <input
+              ref={fileInputRef}
+              id="fileInput"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              style={{ display: "none" }}
+            />
+            <button onClick={handleUploadClick}>Select Image</button>
           </div>
-        </label>
-        {/* Hidden file input field */}
-        <input
-        ref={fileInputRef}
-        id="fileInput"
-        type="file"
-        accept="image/*"
-        onChange={handleImageChange}
-        style={{ display: "none" }}
-      />
-      <button onClick={handleUploadClick}>Select Image</button>
-      {imagePath && <img src={imagePath} alt="Uploaded" />}
-        <p className="textofupload">Find and insert media</p>
-      </div>
-                      <div className="uploadingmessage">
-                        <p className="uploaddrag">
-                          <button className="buttonupload">
-                            Upload file
-                          </button>{" "}
-                          or drag here to upload
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          <div className="uploadingmessage">
+            <p className="uploaddrag">
+              <button className="buttonupload">
+                Upload file
+              </button>{" "}
+              or drag here to upload
+            </p>
+          </div>
+        </>
+      )}
+      {imagePath && (
+        <div className="uploadedImage">
+          <img src={`http://localhost:5000${imagePath}`} alt="Uploaded" />
+         
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+
               </div>
             </div>
           </div>
