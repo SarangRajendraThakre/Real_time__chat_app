@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Sidebar.css";
+import { BiImage } from "react-icons/bi";
 
-function QuestionCard({ questionType, index, isNew, logData }) {
+function QuestionCard({ questionType, index, isNew, logData, onDelete }) {
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
@@ -13,10 +14,6 @@ function QuestionCard({ questionType, index, isNew, logData }) {
     }
   }, [isNew]);
 
-  const handleAddQuestion = () => {
-    logData({ questionType, index }); // Log the MCQ data
-  };
-
   return (
     <div className={`card ${added ? "bounce" : ""}`}>
       <div className="question-card">
@@ -25,9 +22,27 @@ function QuestionCard({ questionType, index, isNew, logData }) {
           <div className="card-title">{questionType}</div>
         </div>
         <div className="cardcontent">
-          <div className="maincardcontent"></div>
+          <div className="maincardcontent">
+            <div className="maincardcontentinner">
+              <div className="maincardcontentinnerheading">Question</div>
+              <div className="maincardcontentinnerimage">
+                <div className="maincardcontentinnerimagecountdown"></div>
+                <div className="maincardcontentinnerimagecontainer">
+                  <div className="maincardcontentinnerimagecontainerinner">
+                    <BiImage />
+                  </div>
+                </div>
+              </div>
+              <div className="maincardcontentinneroptioncontainer">
+                <div className="maincardcontentinneroptioncontainerinner"></div>
+                <div className="maincardcontentinneroptioncontainerinner"></div>
+                <div className="maincardcontentinneroptioncontainerinner"></div>
+                <div className="maincardcontentinneroptioncontainerinner"></div>
+              </div>
+            </div>
+          </div>
           <div className="cardsidebar">
-            <span className="icons-side">
+            <span className="icons-side copyicon">
               <svg
                 width="20px"
                 height="20px"
@@ -37,7 +52,6 @@ function QuestionCard({ questionType, index, isNew, logData }) {
                 strokeWidth="0"
                 aria-labelledby="label-1e0058cb-d1de-43ed-857f-bde426ba678e"
                 aria-hidden="true"
-                className="icon__Svg-sc-xvsbpg-1 ipIYNE"
               >
                 <title id="label-1e0058cb-d1de-43ed-857f-bde426ba678e">
                   Icon
@@ -48,7 +62,7 @@ function QuestionCard({ questionType, index, isNew, logData }) {
                 ></path>
               </svg>
             </span>
-            <span className="icons-side">
+            <span className="icons-side deleteicon" onClick={() => onDelete(index-1)}>
               <svg
                 viewBox="0 0 32 32"
                 width="20px"
@@ -58,7 +72,6 @@ function QuestionCard({ questionType, index, isNew, logData }) {
                 strokeWidth="0"
                 aria-labelledby="label-abc58edb-ec86-4095-940a-7ed80f11543c"
                 aria-hidden="true"
-                className="icon__Svg-sc-xvsbpg-1 ipIYNE"
               >
                 <title id="label-abc58edb-ec86-4095-940a-7ed80f11543c">
                   Icon
@@ -72,13 +85,13 @@ function QuestionCard({ questionType, index, isNew, logData }) {
           </div>
         </div>
       </div>
-     
     </div>
   );
 }
+const Sidebar = ({ isModalOpen, handleToggleModal, addQuestion, questionCards, setQuestionCards }) => {
+  // Your Sidebar component code here
 
-function Sidebar({ isModalOpen, handleToggleModal, addQuestion, questionCards }) {
-  const [newCardAdded, setNewCardAdded] = useState(false);
+
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -88,28 +101,22 @@ function Sidebar({ isModalOpen, handleToggleModal, addQuestion, questionCards })
     }
   }, [questionCards]);
 
-  const handleAddQuestion = (type) => {
-    // Add the new question card to the state
-    addQuestion(type);
-    setNewCardAdded(true);
-    setTimeout(() => {
-      setNewCardAdded(false);
-    }, 1000); // Change the duration of the animation as needed
-  };
-
-  const logMCQData = (data) => {
-    console.log("MCQ Data:", data);
+  const handleDelete = (index) => {
+    // Create a new array excluding the card at the specified index
+    const updatedQuestionCards = questionCards.filter((_, i) => i !== index);
+    // Update the state with the new array without the deleted card
+    setQuestionCards(updatedQuestionCards);
   };
 
   return (
     <>
       <div className="sidebar" ref={containerRef}>
         {/* Always render one default card */}
-        <QuestionCard key={0} questionType="Default Question" index={0} isNew={false} logData={logMCQData} />
+        <QuestionCard key={0} questionType="MCQ" index={0} isNew={false}  onDelete={handleDelete} />
 
         {/* Render additional question cards */}
-        {questionCards && questionCards.map((questionType, index) => (
-          <QuestionCard key={index + 1} questionType={questionType} index={index + 1} isNew={newCardAdded} logData={logMCQData} />
+        {questionCards.map((questionType, index) => (
+          <QuestionCard key={index + 1} questionType={questionType} index={index + 1}  onDelete={handleDelete} />
         ))}
       </div>
       <div id="buttonContainer">
@@ -131,6 +138,7 @@ function Sidebar({ isModalOpen, handleToggleModal, addQuestion, questionCards })
       </div>
     </>
   );
-}
+};
+
 
 export default Sidebar;

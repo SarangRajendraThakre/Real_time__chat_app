@@ -8,6 +8,7 @@ import { Container } from "react-bootstrap";
 import NavBar from "./components/NavBar";
 import { AuthContext } from "./context/AuthContext";
 import MainCompile from "./pages/MainCompile";
+import QuizList from "./components/questiontype/QuizList";
 
 const App = () => {
   const { user } = useContext(AuthContext);
@@ -21,6 +22,9 @@ const App = () => {
               />
               
           <Route path="/chat" element={<Chat/>} />
+          
+          <Route path="/quiz" element={<QuizList/>} />
+          
         
           <Route path="/register" element={user ? <MainCompile /> : <Register />} />
           <Route path="/login" element={user ? <MainCompile /> : <Login />} />

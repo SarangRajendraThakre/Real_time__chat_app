@@ -4,6 +4,7 @@ const Quiz = require("../Models/quiz");
 
 const quizController = require('../Controllers/quizController');
 
+router.get('/quizzes/:userId', quizController.getQuizzesByUserId);
 
 router.post('/quizzes', quizController.createQuiz);
 router.post('/add-question', async (req, res) => {

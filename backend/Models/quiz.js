@@ -12,7 +12,7 @@ const questionSchema = new mongoose.Schema({
 const quizSchema = new mongoose.Schema({
   title: String,
   visibility: { type: String, enum: ["public", "private"], default: "public" },
-  imagePath: String,
+  posterImg: String,
   questions: [questionSchema],
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // Reference to the user who created the quiz
 });

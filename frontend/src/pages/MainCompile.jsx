@@ -1,5 +1,3 @@
-// MainCompile.jsx
-
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './MainCompile.css';
@@ -59,8 +57,8 @@ const MainCompile = () => {
   }, [isSettingModalOpen]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const newValue = type === 'checkbox' ? checked : value;
+    const { name, value, type, checked, files } = e.target;
+    const newValue = type === 'checkbox' ? checked : type === 'file' ? files[0] : value;
 
     setFormData({
       ...formData,
@@ -81,12 +79,13 @@ const MainCompile = () => {
   };
 
   const handleToggleModalSetting = () => {
+
     setIsSettingModalOpen(!isSettingModalOpen);
+    
   };
 
   const handleSubmit = async () => {
     try {
-      // Get user object from local storage
       const user = JSON.parse(localStorage.getItem('User'));
   
       if (!user || !user._id) {
@@ -94,23 +93,45 @@ const MainCompile = () => {
         return;
       }
   
-      // Include user ID in the form data
       const formDataWithUser = {
         ...formData,
         userId: user._id
       };
   
-      // Post the quiz data to the backend
+      let uploadedImagePath = ''; // Initialize imagePath
+  
+      // Check if an image is uploaded
+      if (formData.posterImg) {
+        const formDataWithImage = new FormData();
+        formDataWithImage.append('image', formData.posterImg);
+  
+        // Upload the image to the server
+        const uploadResponse = await axios.post('http://localhost:5000/api/upload', formDataWithImage);
+  
+        // Get the path to the uploaded image from the server response
+        uploadedImagePath = uploadResponse.data.imagePath;
+      }
+  
+      // If imagePath is empty, no image was uploaded, so no need to update formDataWithUser
+      if (uploadedImagePath) {
+        formDataWithUser.posterImg = uploadedImagePath;
+      }
+      console.log(formDataWithUser);
+  
       const response = await axios.post('http://localhost:5000/api/quizzes', formDataWithUser);
       console.log('Quiz created successfully!', response.data);
   
-      // Store the ID of the created quiz in local storage or state
       const createdQuizId = response.data._id;
-      localStorage.setItem('createdQuizId', createdQuizId); // Store in local storage
-      // OR
-      // setCreatedQuizId(response.data._id); // Store in state
   
       setIsSettingModalOpen(false);
+  
+      // Clear form fields after successful submission
+      setFormData({
+        title: '',
+        visibility: 'public',
+        folder: 'Your Quiz Folder',
+        posterImg: uploadedImagePath
+      });
     } catch (error) {
       console.error('Error creating quiz:', error);
     }
@@ -129,6 +150,7 @@ const MainCompile = () => {
             handleToggleModal={handleToggleModal} 
             addQuestion={handleAddQuestion} 
             questionCards={questionCards} 
+            setQuestionCards={setQuestionCards} // Pass setQuestionCards as a prop
           />
         </div>
         <div className='maincountainer'>
